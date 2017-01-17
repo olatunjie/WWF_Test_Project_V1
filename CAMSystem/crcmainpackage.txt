@@ -1,0 +1,1106 @@
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Data.OleDb
+Imports System.Data.OracleClient
+Imports System.IO
+Imports System
+Imports WFSystem
+Imports System.Net.Mail
+
+Public Class frmCRCMainPackage
+    Private query, query2, query3, query4, query5, query6, query7, query8, query9 As String
+    Private conn As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private conn2 As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private conn3 As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private conn4 As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private conn5 As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private conn6 As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private conn7 As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private conn8 As New SqlConnection("server=10.0.0.155;Database=FinconBRs;User=sa;pwd=system")
+    Private cmd As SqlCommand
+    Private cmd2 As New SqlCommand
+    Private cmd3 As New SqlCommand
+    Private cmd4 As New SqlCommand
+    Private cmd5 As New SqlCommand
+    Private cmd6 As New SqlCommand
+    Private cmd7 As New SqlCommand
+    Private cmd8 As New SqlCommand
+    Private cmd9 As New SqlCommand
+    Private cmd10 As New SqlCommand
+    Private cmd11 As New SqlCommand
+    Private storex As New DAL
+    Private rule As New WFSystem.Rule
+    Private userRule As String = String.Empty
+    Private assusers As New Users
+    Private userslist As New ArrayList
+    Private userprp As SqlClient.SqlDataReader
+    Private MAT_DATE As Date
+    Private Timespan As TimeSpan
+    Private EXP_DAYS As Integer
+    Private BRA_CODE As Integer = 0
+    Private CUS_NUM As Integer = 0
+    Private CUR_CODE As Integer = 0
+    Private LED_CODE As Integer = 0
+    Private SUB_ACCT_CODE As Integer = 0
+    Private sender As String = String.Empty
+    Private recipient As String = String.Empty
+    Private msg As String = String.Empty
+    Private ausers As New AssignedUsers
+    Private addprop As New DocProperties
+    Private parser As New RuleParser
+
+    Private Sub btnRun_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRun.Click
+        'state.Visible = False
+        'ExecuteSpAccount()
+        'ExecuteSpAccount2()
+        'ExecuteSpDealsLoan()
+        'ExecuteSpDealsLoan2()
+        'ExecuteDealsFacility()
+        'ConvertAcct()
+        'ExecuteUsp_PopulateDealsTable()
+        'ExecuteSpCRBureauLoanIns()
+        'ExecuteSpLoanIns()
+        'ExecuteSpLoan_Ins_Del()
+        'ExecuteSpLoan_Ins()
+        'ExecuteSpLoan_Ins2()
+        'ExecuteLoan()
+        'ExecuteSPCRCCRDATE_1()
+        'ExecuteSPCRCCRDATE_2()
+        'ExecuteSPCRCDRDATE()
+        'ExecuteSpCRCDateDueFromBanks()
+        'ExecuteSpCRCDateDueFromBanks2()
+        'ExecuteCreditBurClassifi()
+        'GenerateCRBureauSubjCorporate()
+        'GenerateCRBureauDealsCorporate()
+        'GenerateCRBureauDealsConsumer()
+        'GenerateCRBureauSubjConsumer()
+
+        'state.Visible = True
+        'state.Text = "Completed!"
+    End Sub
+
+    Public Sub ExecuteSpAccount()
+        Try
+            cmd = New SqlCommand("spACCOUNT", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpAccount)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpAccount2()
+        Try
+            cmd = New SqlCommand("spACCOUNT2", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpAccount2)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpDealsLoan()
+        Try
+            cmd = New SqlCommand("spDealsLoan", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpDealsLoan)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpDealLoan()
+        Try
+            cmd = New SqlCommand("spDealLoan", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpDealLoan)", "Error")
+        End Try
+    End Sub
+
+    Private Sub ExecuteSpDealsLoan2()
+        Try
+            cmd = New SqlCommand()
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.Connection = conn
+            cmd.CommandType = CommandType.Text
+            cmd.CommandTimeout = 0
+
+            Dim reader As OracleDataReader
+            Dim cmdora As OracleCommand
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            query = "SELECT  set_acct, 'LOAN_TAB' AS TYPE, BRA_CODE, CUS_NUM, CUR_CODE, LED_CODE, SUB_ACCT_CODE, TRA_DATE, LOAN_AMT, LAST_INS_DATE,ins_per FROM LOAN_TAB WHERE LOAN_STA=1"
+            cmdora = New OracleCommand(query, connect)
+            cmdora.CommandType = CommandType.Text
+            reader = cmdora.ExecuteReader
+
+            While (reader.Read)
+                cmd.CommandText = "INSERT INTO FinconBRs.dbo.Deals(SET_ACCT,Type,Bra_Code,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,Eff_DATE,Amount,Mat_date,ins_per) VALUES('" & reader.GetString(0) & "','" & reader.GetString(1) & "'," & reader.GetInt32(2) & "," & reader.GetInt32(3) & "," & reader.GetInt32(4) & "," & reader.GetInt32(5) & "," & reader.GetInt32(6) & ",'" & Convert.ToDateTime(reader.GetValue(7)).Date.ToString("dd-MMM-yyyy") & "'," & reader.GetValue(8) & ",'" & Convert.ToDateTime(reader.GetValue(9)).Date.ToString("dd-MMM-yyyy") & "'," & reader.GetInt32(10) & ")"
+                cmd.ExecuteNonQuery()
+            End While
+            reader.Close()
+            cmd.Connection.Close()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpDealsLoan2)", "Error")
+        End Try
+    End Sub
+
+    Private Sub ExecuteSpDealLoan2()
+        Try
+            cmd = New SqlCommand()
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.Connection = conn
+            cmd.CommandType = CommandType.Text
+            cmd.CommandTimeout = 0
+
+            Dim reader As OracleDataReader
+            Dim cmdora As OracleCommand
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            query = "SELECT  set_acct, 'LOAN_TAB' AS TYPE, BRA_CODE, CUS_NUM, CUR_CODE, LED_CODE, SUB_ACCT_CODE, TRA_DATE, LOAN_AMT, LAST_INS_DATE,ins_per FROM LOAN_TAB WHERE LOAN_STA IN (2,3,5) AND LAST_INS_DATE>='01-JAN-2011'"
+            cmdora = New OracleCommand(query, connect)
+            cmdora.CommandType = CommandType.Text
+            reader = cmdora.ExecuteReader
+
+            While (reader.Read)
+                cmd.CommandText = "INSERT INTO FinconBRs.dbo.Deals2(SET_ACCT,Type,Bra_Code,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,Eff_DATE,Amount,Mat_date,ins_per) VALUES('" & reader.GetString(0) & "','" & reader.GetString(1) & "'," & reader.GetInt32(2) & "," & reader.GetInt32(3) & "," & reader.GetInt32(4) & "," & reader.GetInt32(5) & "," & reader.GetInt32(6) & ",'" & Convert.ToDateTime(reader.GetValue(7)).Date.ToString("dd-MMM-yyyy") & "'," & reader.GetValue(8) & ",'" & Convert.ToDateTime(reader.GetValue(9)).Date.ToString("dd-MMM-yyyy") & "'," & reader.GetInt32(10) & ")"
+                cmd.ExecuteNonQuery()
+            End While
+            reader.Close()
+            cmd.Connection.Close()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpDealLoan2)", "Error")
+        End Try
+    End Sub
+
+    Private Sub ExecuteDealsFacility()
+        Try
+            cmd = New SqlCommand()
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.Connection = conn
+            cmd.CommandType = CommandType.Text
+            cmd.CommandTimeout = 0
+
+            Dim reader As OracleDataReader
+            Dim cmdora As OracleCommand
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            query = "SELECT TYPE, DATE_STA_CHA, MAT_DATE, CUS_NUM, BRA_CODE, CUR_CODE, LED_CODE, SUB_ACCT_CODE, INT_RATE, FAC_AMT FROM overdrafts"
+            cmdora = New OracleCommand(query, connect)
+            cmdora.CommandType = CommandType.Text
+            reader = cmdora.ExecuteReader
+
+            While (reader.Read)
+                cmd.CommandText = "INSERT INTO FinconBRs.dbo.Deals(Type,Eff_DATE,Mat_date,CUS_NUM,Bra_Code,CUR_CODE,LED_CODE,SUB_ACCT_CODE,Rate,Amount,TotalInstallments,OverdueDays) VALUES('" & reader.GetString(0) & "','" & Convert.ToDateTime(reader.GetValue(1)).Date.ToString("dd-MMM-yyyy") & "','" & Convert.ToDateTime(reader.GetValue(2)).Date.ToString("dd-MMM-yyyy") & "'," & reader.GetInt32(3) & "," & reader.GetInt32(4) & "," & reader.GetInt32(5) & "," & reader.GetInt32(6) & "," & reader.GetInt32(7) & "," & reader.GetFloat(8) & "," & reader.GetValue(9) & ",1," & Integer.Parse(DateTimePicker1.Value.Date.Subtract(reader.GetDateTime(2).Date).TotalDays.ToString) & ")"
+                cmd.ExecuteNonQuery()
+            End While
+            reader.Close()
+            cmd.Connection.Close()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteDealsFacility)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ConvertAcct()
+        Try
+            cmd = New SqlCommand("ConvertAcct", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ConvertAcct)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteUsp_PopulateDealsTable()
+        Try
+            cmd = New SqlCommand("usp_PopulateDealsTable", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteUsp_PopulateDealsTable)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpLoan_Ins_Del()
+        Try
+            cmd = New SqlCommand("spTblInsLoan", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpLoan_Ins_Del)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpLoan_Ins_Del2()
+        Try
+            cmd = New SqlCommand("spTblInsLoan2", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpLoan_Ins_Del2)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpLoan_Ins()
+        Try
+            cmd = New SqlCommand()
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.Connection = conn
+            cmd.CommandType = CommandType.Text
+            cmd.CommandTimeout = 0
+
+            Dim reader As OracleDataReader
+            Dim cmdora As OracleCommand
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            query = "SELECT BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,INS_AMT,INS_BAL,INS_INT,MAT_DATE,TRA_DATE,INS_STA FROM Loan_ins WHERE MAT_DATE > TO_DATE('" & DateTimePicker1.Value.ToString("yyyy-MM-dd") & "', 'YYYY-MM-DD')"
+            cmdora = New OracleCommand(query, connect)
+            cmdora.CommandType = CommandType.Text
+            reader = cmdora.ExecuteReader
+
+            While (reader.Read)
+                cmd.CommandText = "INSERT INTO tblLoanIns VALUES(" & reader.GetValue(0) & "," & reader.GetValue(1) & "," & reader.GetValue(2) & "," & reader.GetValue(3) & "," & reader.GetValue(4) & "," & reader.GetValue(5) & "," & reader.GetValue(6) & "," & reader.GetValue(7) & ",'" & Convert.ToDateTime(reader.GetValue(8)).Date.ToString("yyyy-MM-dd") & "','" & Convert.ToDateTime(reader.GetValue(9)).Date.ToString("yyyy-MM-dd") & "'," & reader.GetValue(10) & ")"
+                cmd.ExecuteNonQuery()
+            End While
+            reader.Close()
+            cmd.Connection.Close()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpLoan_Ins)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpIns()
+        Try
+            Dim newdate As New Date(DateTimePicker1.Value.Year, DateTimePicker1.Value.Month, 1)
+            cmd = New SqlCommand()
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.Connection = conn
+            cmd.CommandType = CommandType.Text
+            cmd.CommandTimeout = 0
+
+            Dim reader As OracleDataReader
+            Dim cmdora As OracleCommand
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            query = "SELECT BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,INS_AMT,INS_BAL,INS_INT,MAT_DATE,TRA_DATE,INS_STA FROM Loan_ins WHERE MAT_DATE BETWEEN '" & newdate.ToString("dd-MMM-yyyy") & "' AND '" & DateTimePicker1.Value.ToString("dd-MMM-yyyy") & "'"
+            cmdora = New OracleCommand(query, connect)
+            cmdora.CommandType = CommandType.Text
+            reader = cmdora.ExecuteReader
+
+            While (reader.Read)
+                cmd.CommandText = "INSERT INTO tblLoanIns2 VALUES(" & reader.GetValue(0) & "," & reader.GetValue(1) & "," & reader.GetValue(2) & "," & reader.GetValue(3) & "," & reader.GetValue(4) & "," & reader.GetValue(5) & "," & reader.GetValue(6) & "," & reader.GetValue(7) & ",'" & Convert.ToDateTime(reader.GetValue(8)).Date.ToString("yyyy-MM-dd") & "','" & Convert.ToDateTime(reader.GetValue(9)).Date.ToString("yyyy-MM-dd") & "'," & reader.GetValue(10) & ")"
+                cmd.ExecuteNonQuery()
+            End While
+            reader.Close()
+            cmd.Connection.Close()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpIns)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpLoan_Ins2()
+        Try
+            cmd = New SqlCommand("spInsLoan2", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpLoan_Ins2)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteLoan()
+        Try
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            Dim connect2 As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            Dim connect3 As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            Dim connect4 As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            If connect2.State = ConnectionState.Closed Then
+                connect2.Open()
+            End If
+            If connect3.State = ConnectionState.Closed Then
+                connect3.Open()
+            End If
+            If connect4.State = ConnectionState.Closed Then
+                connect4.Open()
+            End If
+
+
+            Dim command As New OracleCommand(query, connect)
+            command.CommandTimeout = 0
+            command.CommandType = CommandType.Text
+
+            Dim command2 As New OracleCommand(query4, connect2)
+            command2.CommandTimeout = 0
+            command2.CommandType = CommandType.Text
+
+            Dim command3 As New OracleCommand(query8, connect3)
+            command3.CommandTimeout = 0
+            command3.CommandType = CommandType.Text
+
+            Dim command4 As New OracleCommand(query9, connect4)
+            command4.CommandTimeout = 0
+            command4.CommandType = CommandType.Text
+
+            Dim reader As SqlDataReader
+            Dim reader2 As OracleDataReader
+            Dim reader3 As OracleDataReader
+            Dim reader4 As OracleDataReader
+            Dim reader5 As SqlDataReader
+            Dim reader6 As SqlDataReader
+            Dim reader7 As SqlDataReader
+            Dim reader8 As OracleDataReader
+            Dim reader9 As OracleDataReader
+            Dim PRINCIP_OVD As Double = 0.0
+            Dim INT_OVD As Double = 0.0
+            Dim LAST_PAY_PRINCIP As Double = 0.0
+            Dim LAST_PAY_INT As Double = 0.0
+            Dim LAST_PAY_DATE As Date
+            Dim OVD_DATE As Date
+            Dim MAX_DATE As Date
+            Dim OVD_DAYS As Integer = 0
+            Dim PRINCIP_OUT As Double = 0.0
+            Dim INT_OUT As Double = 0.0
+            Dim noinstalli As Integer = 0
+            Dim noinstallp As Integer = 0
+            Dim timespan As TimeSpan
+            Dim crnt_bal As Double = 0.0
+            Dim OVD_TOTAL As Double = 0.0
+            Dim OVD_BAL_DIFF As Double = 0.0
+
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            If conn2.State = ConnectionState.Closed Then conn2.Open()
+            If conn3.State = ConnectionState.Closed Then conn3.Open()
+            If conn4.State = ConnectionState.Closed Then conn4.Open()
+            If conn5.State = ConnectionState.Closed Then conn5.Open()
+            If conn6.State = ConnectionState.Closed Then conn6.Open()
+            If conn7.State = ConnectionState.Closed Then conn7.Open()
+            If conn8.State = ConnectionState.Closed Then conn8.Open()
+
+            cmd4.Connection = conn2
+            cmd5.Connection = conn3
+            cmd6.Connection = conn4
+            cmd7.Connection = conn5
+            cmd8.Connection = conn6
+            cmd9.Connection = conn7
+            cmd10.Connection = conn8
+
+            cmd4.CommandTimeout = 0
+            cmd5.CommandTimeout = 0
+            cmd6.CommandTimeout = 0
+            cmd7.CommandTimeout = 0
+            cmd8.CommandTimeout = 0
+            cmd9.CommandTimeout = 0
+            cmd10.CommandTimeout = 0
+
+            cmd = New SqlCommand("spGetLoanInfo", conn)
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+
+            cmd2.Connection = conn
+            cmd3.Connection = conn
+
+            cmd2.CommandTimeout = 0
+            cmd3.CommandTimeout = 0
+
+            cmd2.CommandType = CommandType.Text
+            cmd2.CommandText = "DELETE FROM LoanInstall"
+            cmd2.ExecuteNonQuery()
+
+            cmd9.CommandType = CommandType.Text
+            cmd9.CommandText = "DELETE FROM tblLoanInfo"
+            cmd9.ExecuteNonQuery()
+
+            cmd3.CommandText = "DELETE FROM LoanCreditDate"
+            cmd3.ExecuteNonQuery()
+
+            reader = cmd.ExecuteReader()
+
+            While (reader.Read)
+                LAST_PAY_DATE = Nothing
+                PRINCIP_OVD = 0.0
+                INT_OVD = 0.0
+                OVD_DATE = Nothing
+                MAX_DATE = Nothing
+                LAST_PAY_PRINCIP = 0.0
+                LAST_PAY_INT = 0.0
+                OVD_DAYS = 0
+                noinstalli = 0
+                noinstallp = 0
+                PRINCIP_OUT = 0.0
+                INT_OUT = 0.0
+                crnt_bal = 0.0
+                OVD_TOTAL = 0.0
+                OVD_BAL_DIFF = 0.0
+
+                query = "SELECT BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,MAX(TRA_DATE) AS MAX_DATE FROM transact WHERE CRNT_BAL >= 0 AND TRA_DATE<=TO_DATE('" & DateTimePicker1.Value.ToString("yyyy-MM-dd") & "','YYYY-MM-DD') AND BRA_CODE=" & reader.GetValue(10) & " AND CUS_NUM=" & reader.GetValue(1) & " AND CUR_CODE=" & reader.GetValue(2) & " AND LED_CODE=" & reader.GetValue(3) & " AND SUB_ACCT_CODE=" & reader.GetValue(4) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                command.CommandText = query
+                reader2 = command.ExecuteReader
+                While (reader2.Read)
+                    MAX_DATE = reader2.GetDateTime(5)
+                    query2 = "SELECT BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,TRA_AMT,DEB_CRE_IND,CRNT_BAL,TRA_DATE,TRA_SEQ1,TRA_SEQ2 FROM transact WHERE BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " AND TRA_DATE > TO_DATE('" & Format(reader2.GetDateTime(5).Date, "yyyy-MMM-dd") & "','YYYY-MM-DD')"
+                    cmd4.CommandText = "INSERT INTO LoanCreditDate VALUES(" & reader2.GetInt32(0) & "," & reader2.GetInt32(1) & "," & reader2.GetInt32(2) & "," & reader2.GetInt32(3) & "," & reader2.GetInt32(4) & ",'" & Convert.ToDateTime(reader2.GetDateTime(5)).ToString("yyyy-MM-dd") & "')"
+                    cmd4.ExecuteNonQuery()
+                    Exit While
+                End While
+                reader2.Close()
+
+                command.CommandText = query2
+                reader3 = command.ExecuteReader
+                While (reader3.Read)
+                    query3 = "INSERT INTO LoanInstall VALUES(" & reader3.GetInt32(0) & "," & reader3.GetInt32(1) & "," & reader3.GetInt32(2) & "," & reader3.GetInt32(3) & "," & reader3.GetInt32(4) & "," & reader3.GetDouble(5) & "," & reader3.GetInt32(6) & "," & reader3.GetDouble(7) & ",'" & Convert.ToDateTime(reader3.GetDateTime(8)).ToString("yyyy-MM-dd") & "'," & reader3.GetInt32(9) & "," & reader3.GetInt32(10) & ")"
+                    cmd5.CommandText = query3
+                    cmd5.ExecuteNonQuery()
+                End While
+                reader3.Close()
+
+                query4 = "SELECT BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,MAX(TRA_DATE) AS MAX_DATE FROM transact WHERE DEB_CRE_IND = 2 AND TRA_DATE < TO_DATE('" & Format(MAX_DATE, "yyyy-MMM-dd") & "','YYYY-MM-DD') AND BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                command2.CommandText = query4
+                reader4 = command2.ExecuteReader
+                While (reader4.Read)
+                    LAST_PAY_DATE = reader4.GetDateTime(5)
+
+                    query8 = "SELECT SUM(TRA_AMT) FROM transact WHERE DEB_CRE_IND = 1 AND TRA_DATE > TO_DATE('" & Format(LAST_PAY_DATE, "yyyy-MMM-dd") & "','YYYY-MM-DD') AND TRA_DATE < TO_DATE('" & Format(MAX_DATE, "yyyy-MMM-dd") & "','YYYY-MM-DD') AND BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                    command3.CommandText = query8
+                    reader8 = command3.ExecuteReader
+                    While (reader8.Read)
+                        LAST_PAY_INT = reader8.GetValue(0)
+                    End While
+                    reader8.Close()
+
+                    query9 = "SELECT SUM(TRA_AMT) FROM transact WHERE DEB_CRE_IND = 2 AND TRA_DATE >= TO_DATE('" & Format(LAST_PAY_DATE, "yyyy-MMM-dd") & "','YYYY-MM-DD') AND TRA_DATE < TO_DATE('" & Format(MAX_DATE, "yyyy-MMM-dd") & "','YYYY-MM-DD') AND BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                    command4.CommandText = query9
+                    reader9 = command4.ExecuteReader
+                    While (reader9.Read)
+                        LAST_PAY_PRINCIP = reader9.GetValue(0) - LAST_PAY_INT
+                    End While
+                    reader9.Close()
+                End While
+                reader4.Close()
+
+                query8 = "SELECT COUNT(INS_INT) FROM tblLoanIns WHERE BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                cmd6.CommandText = query8
+                reader7 = cmd6.ExecuteReader
+                While (reader7.Read)
+                    noinstalli = reader7.GetValue(0)
+                End While
+                reader7.Close()
+
+                query8 = "SELECT COUNT(INS_AMT) FROM tblLoanIns WHERE BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                cmd6.CommandText = query8
+                reader7 = cmd6.ExecuteReader
+                While (reader7.Read)
+                    noinstallp = reader7.GetValue(0)
+                End While
+                reader7.Close()
+
+                query5 = "SELECT SUM(CASE WHEN (ABS(TRA_AMT)=ABS(CRNT_BAL)) THEN 0.0000 ELSE TRA_AMT END) AS INT_OVD FROM LoanInstall WHERE DEB_CRE_IND = 1 AND BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                cmd7.CommandText = query5
+                reader5 = cmd7.ExecuteReader
+                While (reader5.Read)
+                    INT_OVD = reader5.GetValue(0)
+                End While
+                reader5.Close()
+
+                query7 = "SELECT SUM(TRA_AMT) AS PRINCIP_OVD_TOT FROM LoanInstall WHERE DEB_CRE_IND = 2 AND BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                cmd6.CommandText = query7
+                reader7 = cmd6.ExecuteReader
+                While (reader7.Read)
+                    PRINCIP_OVD = reader7.GetValue(0) - INT_OVD
+                End While
+                reader7.Close()
+
+                crnt_bal = GetCrntBal(reader.GetValue(10), reader.GetValue(1), reader.GetValue(2), reader.GetValue(3), reader.GetValue(4), DateTimePicker1.Value.ToString("yyyy-MM-dd"))
+                OVD_TOTAL = INT_OVD + PRINCIP_OVD
+                OVD_BAL_DIFF = OVD_TOTAL - Math.Abs(crnt_bal)
+
+                If OVD_BAL_DIFF > 0 Then
+                    If OVD_BAL_DIFF >= INT_OVD Then
+                        PRINCIP_OVD = PRINCIP_OVD - (OVD_BAL_DIFF - INT_OVD)
+                        INT_OVD = 0
+                    Else
+                        INT_OVD = INT_OVD - OVD_BAL_DIFF
+                    End If
+                End If
+
+                query7 = "SELECT SUM(INS_AMT) FROM tblLoanIns WHERE BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                cmd6.CommandText = query7
+                reader7 = cmd6.ExecuteReader
+                While (reader7.Read)
+                    PRINCIP_OUT = reader7.GetValue(0)
+                End While
+                reader7.Close()
+
+                query7 = "SELECT SUM(INS_INT) FROM tblLoanIns WHERE BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                cmd6.CommandText = query7
+                reader7 = cmd6.ExecuteReader
+                While (reader7.Read)
+                    INT_OUT = reader7.GetValue(0)
+                End While
+                reader7.Close()
+
+                query6 = "SELECT DISTINCT BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE,MIN(TRA_DATE) AS DEB_START FROM LoanInstall WHERE BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31) & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE"
+                cmd8.CommandText = query6
+                reader6 = cmd8.ExecuteReader
+                While (reader6.Read)
+                    OVD_DATE = reader6.GetDateTime(5)
+                    timespan = DateTime.Now.Date.Subtract(OVD_DATE)
+                    OVD_DAYS = timespan.Days
+                End While
+                reader6.Close()
+
+                cmd10.CommandText = "UPDATE Deals SET OverdueDays=" & OVD_DAYS & " WHERE BRA_CODE=" & reader.GetValue(27) & " AND CUS_NUM=" & reader.GetValue(28) & " AND CUR_CODE=" & reader.GetValue(29) & " AND LED_CODE=" & reader.GetValue(30) & " AND SUB_ACCT_CODE=" & reader.GetValue(31)
+                cmd10.ExecuteNonQuery()
+
+                Try
+                    If (LAST_PAY_DATE = "12:00:00 AM" And OVD_DATE = "12:00:00 AM") Then
+                        cmd8.CommandText = "INSERT INTO tblLoanInfo VALUES(" & reader.GetValue(27) & "," & reader.GetValue(28) & "," & reader.GetValue(29) & "," & reader.GetValue(30) & "," & reader.GetValue(31) & ",''," & LAST_PAY_PRINCIP & "," & LAST_PAY_INT & "," & INT_OUT & "," & PRINCIP_OUT & "," & PRINCIP_OVD & "," & INT_OVD & ",''," & OVD_DAYS & ",0,0,0," & noinstalli & "," & noinstallp & ")"
+                        cmd8.ExecuteNonQuery()
+                    ElseIf (LAST_PAY_DATE = "12:00:00 AM" And Not (OVD_DATE = "12:00:00 AM")) Then
+                        cmd8.CommandText = "INSERT INTO tblLoanInfo VALUES(" & reader.GetValue(27) & "," & reader.GetValue(28) & "," & reader.GetValue(29) & "," & reader.GetValue(30) & "," & reader.GetValue(31) & ",''," & LAST_PAY_PRINCIP & "," & LAST_PAY_INT & "," & INT_OUT & "," & PRINCIP_OUT & "," & PRINCIP_OVD & "," & INT_OVD & ",'" & OVD_DATE.Date.ToString("yyyy-MM-dd") & "'," & OVD_DAYS & ",0,0,0," & noinstalli & "," & noinstallp & ")"
+                        cmd8.ExecuteNonQuery()
+                    ElseIf (Not (LAST_PAY_DATE = "12:00:00 AM") And OVD_DATE = "12:00:00 AM") Then
+                        cmd8.CommandText = "INSERT INTO tblLoanInfo VALUES(" & reader.GetValue(27) & "," & reader.GetValue(28) & "," & reader.GetValue(29) & "," & reader.GetValue(30) & "," & reader.GetValue(31) & ",'" & LAST_PAY_DATE.Date.ToString("yyyy-MM-dd") & "'," & LAST_PAY_PRINCIP & "," & LAST_PAY_INT & "," & INT_OUT & "," & PRINCIP_OUT & "," & PRINCIP_OVD & "," & INT_OVD & ",''," & OVD_DAYS & ",0,0,0," & noinstalli & "," & noinstallp & ")"
+                        cmd8.ExecuteNonQuery()
+                    Else
+                        cmd8.CommandText = "INSERT INTO tblLoanInfo VALUES(" & reader.GetValue(27) & "," & reader.GetValue(28) & "," & reader.GetValue(29) & "," & reader.GetValue(30) & "," & reader.GetValue(31) & ",'" & LAST_PAY_DATE.Date.ToString("yyyy-MM-dd") & "'," & LAST_PAY_PRINCIP & "," & LAST_PAY_INT & "," & INT_OUT & "," & PRINCIP_OUT & "," & PRINCIP_OVD & "," & INT_OVD & ",'" & OVD_DATE.Date.ToString("yyyy-MM-dd") & "'," & OVD_DAYS & ",0,0,0," & noinstalli & "," & noinstallp & ")"
+                        cmd8.ExecuteNonQuery()
+                    End If
+                Catch ex As Exception
+                    Continue While
+                End Try
+            End While
+            reader.Close()
+
+            conn.Close()
+            connect.Close()
+            connect2.Close()
+            connect3.Close()
+            connect4.Close()
+            conn2.Close()
+            conn3.Close()
+            conn4.Close()
+            conn5.Close()
+            conn6.Close()
+            conn7.Close()
+            conn8.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteLoan)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpCRBureauLoanIns()
+        Try
+            cmd = New SqlCommand("spCRBureauLoanIns", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpCRBureauLoanIns)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpLoanIns()
+        Try
+            cmd = New SqlCommand("spLoanIns", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpLoanIns)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpCRCInsertINTOBanksDueDate()
+        Try
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            query = "DELETE FROM TBLCRCACCOUNTDRDATE2"
+            Dim command As New OracleCommand(query, connect)
+            command.CommandTimeout = 0
+            command.ExecuteNonQuery()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpCRCInsertINTOBanksDueDate)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpCRCInsertINTOBanksDueDate2()
+        Try
+            cmd = New SqlCommand("spCRCInsertINTOBanksDueDate2", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpCRCInsertINTOBanksDueDate2)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSPCRCCRDATE_1()
+        Try
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+            query = "DELETE FROM TBLCRACCOUNTDRDATE3"
+            Dim command As New OracleCommand(query, connect)
+            command.CommandTimeout = 0
+            command.ExecuteNonQuery()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSPCRCCRDATE_1)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSPCRCCRDATE_2()
+        Try
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+
+            Dim command As New OracleCommand("SPCRCCRDATE(200,1000)", connect)
+            command.CommandTimeout = 0
+            command.CommandType = CommandType.StoredProcedure
+
+            command.ExecuteNonQuery()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSPCRCCRDATE_2)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSPCRCDRDATE()
+        Try
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+
+            Dim command As New OracleCommand("SPCRCDRDATE(200,1000)", connect)
+            command.CommandTimeout = 0
+            command.CommandType = CommandType.StoredProcedure
+
+            command.ExecuteNonQuery()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSPCRCDRDATE)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpCRCDateDueFromBanks()
+        Try
+            cmd = New SqlCommand("spCRCDateDueFromBanks", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpCRCDateDueFromBanks)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpCRCDateDueFromBanks2()
+        Try
+            cmd = New SqlCommand("spCRCDateDueFromBanks2", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpCRCDateDueFromBanks2)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteSpImportDueDateFromBanks()
+        Try
+            cmd = New SqlCommand("spImportDueDatesBanks", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteSpImportDueDateFromBanks)", "Error")
+        End Try
+    End Sub
+
+    Public Sub ExecuteCreditBurClassifi()
+        Try
+            cmd = New SqlCommand("CreditBurClassifi", conn)
+            If conn.State = ConnectionState.Closed Then conn.Open()
+            cmd.CommandType = CommandType.StoredProcedure
+            cmd.CommandTimeout = 0
+            cmd.ExecuteNonQuery()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (ExecuteCreditBurClassifi)", "Error")
+        End Try
+    End Sub
+
+    Public Function GetCrntBal(ByVal BRA_CODE As Integer, ByVal CUS_NUM As Integer, ByVal CUR_CODE As Integer, ByVal LED_CODE As Integer, ByVal SUB_ACCT_CODE As Integer, ByVal TRA_DATE As String) As Double
+        Try
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            Dim reader1 As OracleDataReader
+            Dim amt As Double = 0
+
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+
+            Dim command As OracleCommand
+            command = New OracleCommand
+            command.Connection = connect
+            command.CommandTimeout = 0
+            command.CommandType = CommandType.Text
+
+            command.CommandText = "SELECT CRNT_BAL FROM transact WHERE TRA_DATE=(SELECT DISTINCT MAX(TRA_DATE) FROM transact WHERE TRA_DATE<=TO_DATE('" & TRA_DATE & "','YYYY-MM-DD') AND BRA_CODE=" & BRA_CODE & " AND CUS_NUM=" & CUS_NUM & " AND CUR_CODE=" & CUR_CODE & " AND LED_CODE=" & LED_CODE & " AND SUB_ACCT_CODE=" & SUB_ACCT_CODE & " GROUP BY BRA_CODE,CUS_NUM,CUR_CODE,LED_CODE,SUB_ACCT_CODE) AND BRA_CODE=" & BRA_CODE & " AND CUS_NUM=" & CUS_NUM & " AND CUR_CODE=" & CUR_CODE & " AND LED_CODE=" & LED_CODE & " AND SUB_ACCT_CODE=" & SUB_ACCT_CODE & " ORDER BY TRA_SEQ1 DESC,TRA_SEQ2 DESC"
+            'command.CommandText = "SELECT CRNT_BAL FROM ACCOUNT WHERE BRA_CODE=" & BRA_CODE & " AND CUS_NUM=" & CUS_NUM & " AND CUR_CODE=" & CUR_CODE & " AND LED_CODE=" & LED_CODE & " AND SUB_ACCT_CODE=" & SUB_ACCT_CODE
+            reader1 = command.ExecuteReader
+            While reader1.Read
+                amt = reader1.GetValue(0)
+                Exit While
+            End While
+            reader1.Close()
+            Return amt
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " - GetCrntBal()", "Error")
+        End Try
+
+    End Function
+
+    Private Sub GenerateCRBureauSubjCorporate()
+        Try
+            Dim query2 As String = String.Empty
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+
+            Dim sb As New System.Text.StringBuilder
+            query2 = "SELECT DISTINCT A.BRA_CODE AS DATAPROVIDER, A.BRA_CODE || A.CUS_NUM || A.CUR_CODE || A.LED_CODE || A.SUB_ACCT_CODE AS ACCOUNTNO, A.CUS_NUM AS IDENTIFICATIONNUMBER, ' ' AS PREV_ID_NO, B.REG_NUM, TO_CHAR(B.BIR_DATE, 'DD-MON-YYYY') " & _
+                    "AS BIRTHDATE,' ' AS BUSINESSREGNUMBER, ' ' AS INCORPCERTNUMBER, ' ' AS REGTRUSTEENUMBER, D.ID_NUM AS TAXIDENTIFICATIONNUMBER, ' ' AS CODEOFISSUINGAUTHORITY1, ' ' AS VALUEFORIDCODE1, ' ' AS DATEIDCODEEXPIRY1, ' ' AS CODEOFISSUINGAUTHORITY2, " & _
+                    "' ' AS VALUEFORIDCODE2, ' ' AS DATEIDCODEEXPIRY2, case when b.cus_class<>3 then 'Yes' else 'No' end AS SUBJECTSME, D.LEGAL_STA_CODE AS LEGALCONSTITUTION, C.CUS_SHO_NAME AS REGNAME, C.CUS_SHO_NAME AS TRADENAME, ' ' AS PREVREGNAME, ' ' AS PREVTRADENAME, " & _
+                    "B.ECO_SEC AS BUSINESSTYPE1, ' ' AS BUSINESSTYPE2, ' ' AS BUSINESSTYPE3, '001' AS ADDRESSTYPE1, C.ADD_LINE1 AS ADDRESS11, C.ADD_LINE2 AS ADDRESS12, ' ' AS ADDRESS13, C.CITY_LOC_CODE AS CITYCATVALUE1, B.STATE AS STATECATVALUE1, ' ' AS POSTALCODE1, B.COU_OF_RESI AS COUNTRY1, " & _
+                    "' ' AS ADDRESSTYPE2, ' ' AS ADDRESS21, ' ' AS ADDRESS22, ' ' AS ADDRESS23, ' ' AS CITYCATVALUE2, ' ' AS STATECATVALUE2, ' ' AS POSTALCODE2, ' ' AS COUNTRY2, ' ' AS PREVTURNOVER, ' ' AS TOTALASSETVALUE, ' ' AS EMPLOYEENO, ' ' AS PHONEAREA, C.MOB_NUM AS MOBILENO, C.FAX_NUM AS FAX, " & _
+                      "C.EMAIL AS EMAIL, ' ' AS WEBSITE FROM ACCOUNT A, CUSTOMER B, CUST_PRO D, QRYADDRESS C WHERE A.BRA_CODE = B.BRA_CODE And A.CUS_NUM = B.CUS_NUM AND A.BRA_CODE = D.BRA_CODE AND A.CUS_NUM = D.CUS_NUM AND A.BRA_CODE = C.BRA_CODE And A.CUS_NUM = C.CUS_NUM AND A.CUR_CODE = C.CUR_CODE AND A.SUB_ACCT_CODE = C.SUB_ACCT_CODE AND A.LED_CODE = C.LED_CODE AND A.ACCT_NAT <> 1 and a.led_code in (38, 40, 41, 42, 43, 45, 46, 47, 48, 1107, 1208, 1209, 1213, 1215, 1217, 1218, 1219, 1222, 1223, 1224, 1498)"
+
+            query = query2 & " UNION SELECT DISTINCT A.BRA_CODE AS DATAPROVIDER, A.BRA_CODE || A.CUS_NUM || A.CUR_CODE || A.LED_CODE || A.SUB_ACCT_CODE AS ACCOUNTNO, A.CUS_NUM AS IDENTIFICATIONNUMBER, ' ' AS PREV_ID_NO, B.REG_NUM, TO_CHAR(B.BIR_DATE, 'DD-MON-YYYY') " & _
+                    "AS BIRTHDATE,' ' AS BUSINESSREGNUMBER, ' ' AS INCORPCERTNUMBER, ' ' AS REGTRUSTEENUMBER, D.ID_NUM AS TAXIDENTIFICATIONNUMBER, ' ' AS CODEOFISSUINGAUTHORITY1, ' ' AS VALUEFORIDCODE1, ' ' AS DATEIDCODEEXPIRY1, ' ' AS CODEOFISSUINGAUTHORITY2, " & _
+                    "' ' AS VALUEFORIDCODE2, ' ' AS DATEIDCODEEXPIRY2, case when b.cus_class<>3 then 'Yes' else 'No' end AS SUBJECTSME, D.LEGAL_STA_CODE AS LEGALCONSTITUTION, C.CUS_SHO_NAME AS REGNAME, C.CUS_SHO_NAME AS TRADENAME, ' ' AS PREVREGNAME, ' ' AS PREVTRADENAME, " & _
+                    "B.ECO_SEC AS BUSINESSTYPE1, ' ' AS BUSINESSTYPE2, ' ' AS BUSINESSTYPE3, '001' AS ADDRESSTYPE1, C.ADD_LINE1 AS ADDRESS11, C.ADD_LINE2 AS ADDRESS12, ' ' AS ADDRESS13, C.CITY_LOC_CODE AS CITYCATVALUE1, B.STATE AS STATECATVALUE1, ' ' AS POSTALCODE1, B.COU_OF_RESI AS COUNTRY1, " & _
+                    "' ' AS ADDRESSTYPE2, ' ' AS ADDRESS21, ' ' AS ADDRESS22, ' ' AS ADDRESS23, ' ' AS CITYCATVALUE2, ' ' AS STATECATVALUE2, ' ' AS POSTALCODE2, ' ' AS COUNTRY2, ' ' AS PREVTURNOVER, ' ' AS TOTALASSETVALUE, ' ' AS EMPLOYEENO, ' ' AS PHONEAREA, C.MOB_NUM AS MOBILENO, C.FAX_NUM AS FAX, " & _
+                      "C.EMAIL AS EMAIL, ' ' AS WEBSITE FROM ACCOUNT A, CUSTOMER B, CUST_PRO D, QRYADDRESS C WHERE A.BRA_CODE = B.BRA_CODE And A.CUS_NUM = B.CUS_NUM AND A.BRA_CODE = D.BRA_CODE AND A.CUS_NUM = D.CUS_NUM AND A.BRA_CODE = C.BRA_CODE And A.CUS_NUM = C.CUS_NUM AND A.CUR_CODE = C.CUR_CODE AND A.SUB_ACCT_CODE = C.SUB_ACCT_CODE AND A.LED_CODE = C.LED_CODE AND A.ACCT_NAT <> 1 and a.led_code in (1,7,5,2,86,51,59,73,87,74,77,97,52,65,66,68,69,17)"
+            Dim objDataAda As New OracleDataAdapter(query, connect)
+            Dim ds As New DataSet
+            objDataAda.Fill(ds)
+
+            If (Not (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files"))) Then
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files")
+            End If
+
+            Dim sro As New StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files\CR Bureau Subject Corporate.txt", False)
+            Dim dr As DataRow
+
+            sb = New System.Text.StringBuilder
+            For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                sb.Append(ds.Tables(0).Columns(ix).ColumnName)
+                If ix < ds.Tables(0).Columns.Count - 1 Then
+                    sb.Append("|")
+                End If
+            Next
+            sro.WriteLine(sb.ToString)
+
+            For Each dr In ds.Tables(0).Rows
+                sb = New System.Text.StringBuilder
+                For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                    sb.Append(dr.Item(ix))
+                    If ix < ds.Tables(0).Columns.Count - 1 Then
+                        sb.Append("|")
+                    End If
+                Next
+                sro.WriteLine(sb.ToString)
+            Next
+            sro.Close()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (GenerateCRBureauSubjCorporate)", "Error")
+        End Try
+    End Sub
+
+    Private Sub GenerateCRBureauSubjConsumer()
+        Try
+            Dim query2 As String = String.Empty
+            Dim connect As New OracleConnection("user id=appusr;password=testapp;data source=" + "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)" + "(HOST=10.0.0.147)(PORT=1590))(CONNECT_DATA=" + "(SID = HOBANK1)))")
+            If connect.State = ConnectionState.Closed Then
+                connect.Open()
+            End If
+
+            Dim sb As New System.Text.StringBuilder
+            query2 = "SELECT DISTINCT a.bra_code, a.bra_code || a.cus_num || a.cur_code || a.led_code || a.sub_acct_code AS accountno, a.cus_num AS identificationnumber, ' ' AS prev_id_no, b.nationality, d.id_type, " & _
+                    "b.nat_num AS passportnumber, to_char(d.id_exp_date,   'DD-MON-YYYY'), '' AS drivinglicensenumber, '' AS taxidentificationnumber, ' ' AS issue_aut, ' ' AS id_code, '' AS id_code_exp_date, " & _
+                    "' ' AS issue_aut_2, ' ' AS id_code_2, ' ' AS id_code_exp_date_2, ' ' AS cus_lname, c.NAME_LINE1 AS cus_fname, c.NAME_LINE2 AS sub_mid_name, c.cus_sho_name AS name, ' ' AS subalias, ' ' AS subprevname, " & _
+                    "' ' AS cus_fath_name, b.moth_name, '001' AS expr1, c.add_line1, c.add_line2, ' ' AS add_line3, c.city_loc_code, ' ' AS post_code, b.cou_of_resi, '' AS add_type, ' ' AS add_type_line1, " & _
+                    "' ' AS add_type_line2, ' ' AS add_type_line3, ' ' AS city, B.STATE AS state, ' ' AS post_code1, ' ' AS country, ' ' AS emp_type, d.prof_code, d.employ_name, d.bus_add, ' ' AS cus_desig, ' ' AS cus_annual_sal, " & _
+                    "to_char(d.date_of_employ,   'DD-MON-YYYY') AS EmploymentDate, '' AS businessname, b.reg_num, '' AS registrationdate, ' ' AS tel_area_code, c.tel_num, c.mob_num, c.fax_num, c.email, ' ' AS url, to_char(b.bir_date, 'DD-MON-YYYY') AS dob, b.birth_place, " & _
+                    "CASE WHEN d.gender <> 2 THEN 'Male' ELSE 'Female' END gender, d.mrtl_sta, ' ' AS spouse_name FROM ACCOUNT A, CUSTOMER B, QRYADDRESS C, CUST_PRO D WHERE A.BRA_CODE = B.BRA_CODE AND A.CUS_NUM = B.CUS_NUM AND A.BRA_CODE = C.BRA_CODE AND A.CUS_NUM " & _
+                    "= C.CUS_NUM AND A.CUR_CODE = C.CUR_CODE AND A.SUB_ACCT_CODE = C.SUB_ACCT_CODE AND A.LED_CODE = C.LED_CODE AND A.BRA_CODE = D .BRA_CODE (+) AND A.CUS_NUM = D .CUS_NUM (+) AND (A.ACCT_NAT = 1) AND (A.LED_CODE IN (38, 40, 41, 42, 43, 45, 46, 47, 48, 1107, 1208, 1209, 1213, 1215, 1217, 1218, 1219, 1222, 1223, " & _
+                    "1224, 1498))"
+            query = query2 & " UNION SELECT DISTINCT a.bra_code, a.bra_code || a.cus_num || a.cur_code || a.led_code || a.sub_acct_code AS accountno, a.cus_num AS identificationnumber, ' ' AS prev_id_no, b.nationality, d.id_type, " & _
+                    "b.nat_num AS passportnumber, to_char(d.id_exp_date,   'DD-MON-YYYY'), '' AS drivinglicensenumber, '' AS taxidentificationnumber, ' ' AS issue_aut, ' ' AS id_code, '' AS id_code_exp_date, " & _
+                    "' ' AS issue_aut_2, ' ' AS id_code_2, ' ' AS id_code_exp_date_2, ' ' AS cus_lname, c.NAME_LINE1 AS cus_fname, c.NAME_LINE2 AS sub_mid_name, c.cus_sho_name AS name, ' ' AS subalias, ' ' AS subprevname, " & _
+                    "' ' AS cus_fath_name, b.moth_name, '001' AS expr1, c.add_line1, c.add_line2, ' ' AS add_line3, c.city_loc_code, ' ' AS post_code, b.cou_of_resi, '' AS add_type, ' ' AS add_type_line1, " & _
+                    "' ' AS add_type_line2, ' ' AS add_type_line3, ' ' AS city, B.STATE AS state, ' ' AS post_code1, ' ' AS country, ' ' AS emp_type, d.prof_code, d.employ_name, d.bus_add, ' ' AS cus_desig, ' ' AS cus_annual_sal, " & _
+                    "to_char(d.date_of_employ,   'DD-MON-YYYY') AS EmploymentDate, '' AS businessname, b.reg_num, '' AS registrationdate, ' ' AS tel_area_code, c.tel_num, c.mob_num, c.fax_num, c.email, ' ' AS url, to_char(b.bir_date, 'DD-MON-YYYY') AS dob, b.birth_place, " & _
+                    "CASE WHEN d.gender <> 2 THEN 'Male' ELSE 'Female' END gender, d.mrtl_sta, ' ' AS spouse_name FROM ACCOUNT A, CUSTOMER B, QRYADDRESS C, CUST_PRO D WHERE A.BRA_CODE = B.BRA_CODE AND A.CUS_NUM = B.CUS_NUM AND A.BRA_CODE = C.BRA_CODE AND A.CUS_NUM " & _
+                    "= C.CUS_NUM AND A.CUR_CODE = C.CUR_CODE AND A.SUB_ACCT_CODE = C.SUB_ACCT_CODE AND A.LED_CODE = C.LED_CODE AND A.BRA_CODE = D .BRA_CODE (+) AND A.CUS_NUM = D .CUS_NUM (+) AND (A.ACCT_NAT = 1) AND (A.LED_CODE IN (1,7,5,2,86,51,59,73,87,74,77,97,52,65,66,68,69,17))"
+            Dim objDataAda As New OracleDataAdapter(query, connect)
+            Dim ds As New DataSet
+            objDataAda.Fill(ds)
+
+            If (Not (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files"))) Then
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files")
+            End If
+
+            Dim sro As New StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files\CR Bureau Subject Consumer.txt", False)
+            Dim dr As DataRow
+
+            sb = New System.Text.StringBuilder
+            For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                sb.Append(ds.Tables(0).Columns(ix).ColumnName)
+                If ix < ds.Tables(0).Columns.Count - 1 Then
+                    sb.Append("|")
+                End If
+            Next
+            sro.WriteLine(sb.ToString)
+
+            For Each dr In ds.Tables(0).Rows
+                sb = New System.Text.StringBuilder
+                For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                    sb.Append(dr.Item(ix))
+                    If ix < ds.Tables(0).Columns.Count - 1 Then
+                        sb.Append("|")
+                    End If
+                Next
+                sro.WriteLine(sb.ToString)
+            Next
+            sro.Close()
+            connect.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (GenerateCRBureauSubjConsumer)", "Error")
+        End Try
+    End Sub
+
+    Private Sub GenerateCRBureauDealsCorporate()
+        Try
+            Dim query2 As String = String.Empty
+            Dim sb As New System.Text.StringBuilder
+            query2 = "SELECT a.BRA_CODE AS branchID, '' AS prevBranchID, CAST(a.BRA_CODE AS nvarchar(4)) + CAST(a.CUS_NUM AS nvarchar(7))+ CAST(a.CUR_CODE AS nvarchar(4)) + CAST(a.LED_CODE AS nvarchar(4)) + CAST(a.SUB_ACCT_CODE AS nvarchar(4)) AS accountNo, " & _
+                    "'' AS prevAccNo, '002' AS [Consent Stat], ' ' AS [Consent Begin Date], ' ' AS [Consent Expiry Date], a.LED_CODE AS typeCode, LoanPurpose.Code AS PurposeOfCF, '001' AS [OwnrshipIndicator/OwnAccount], b.Amount AS [Card Limit], CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END " & _
+                    "AS [approval date], b.CUR_CODE AS currencyCode, a.Fix_flt_flag AS interestRateType, b.Rate AS AnnualInterestRate, CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END AS ActivationDate, CASE WHEN (b.Mat_Date = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Mat_Date, 106), ' ', '-') END AS [maturity date], ISNULL(b.ins_per, 0) " & _
+                    "AS InterestRepayFreqCode, ISNULL(b.ins_per, 0) AS PrincipalRepayFreqCode, abs(e.TotInstallment) AS TotalNoOfInterestInstallments, abs(e.TotInstallment) AS TotalNoOfPrincipalInstallments, ISNULL(c.INSTALLMENTI,0) AS TotalAmountOfInterestInstallments, ISNULL(c.INSTALLMENTP,0) AS TotalAmountOfPrincipalInstallments, ' ' AS [Highest Credit Used], b.Amount AS [loan amount], " & _
+                    "ISNULL(c.LAST_PAY_INT,0) AS lastInterestPaid, ISNULL(c.LAST_PAY_PRINCIP,0) AS LastPrincipalPaid, CASE WHEN (c.LAST_PAY_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), c.LAST_PAY_DATE, 106), ' ', '-') END AS DatelastPaid, CASE WHEN (c.LAST_PAY_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), c.LAST_PAY_DATE, 106), ' ', '-') END AS [Date of last payment received (Interest)], ISNULL(b.OverdueDays,0) AS NoofDaysOverdueP, ISNULL(b.OverdueDays,0) AS NoofDaysOverdueI, ISNULL(c.INT_OVD,0) AS InterestOverdue, ISNULL(c.PRINCIP_OVD,0) " & _
+                    "AS PrincipalOverdue, ISNULL(c.INT_OUT,0) AS InterestOutstanding, ISNULL(c.PRINCIP_OUT,0) AS PrincipalOutstanding, ISNULL(c.NoOutstandingI,0) AS [No of outstanding interest payments], ISNULL(c.NoOutstandingP,0) AS [No of outstanding principal payments], b.Classification AS [asset code], CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '1') THEN '001' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '2') THEN '002' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '4') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '8') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '3') " & _
+                    "THEN '004' ELSE '' END) END) END) END) END AS [Account Status], '' AS [CF restructure date], '' AS [amount written off], '' AS [reason for write off], " & _
+                    "CASE WHEN a.STA_CODE = 2 THEN CASE WHEN a.DATE_STA_CHA LIKE '%0001-01-0%' THEN '01-Jan-1933' ELSE REPLACE(CONVERT(VARCHAR(12), cast(a.DATE_STA_CHA AS datetime), 106), ' ', '-') END ELSE NULL END AS [close date], '' AS [reason for close], '002' AS securityCoverageCode, '002' AS GuaranteeCoverage, CASE WHEN d.LEGAL_STA_CODE IS NOT NULL THEN '001' ELSE '002' END AS LegalAction, " & _
+                    "'001' AS [TransTypeCode/DEFAULT], '' AS DisputeID FROM ACCOUNT a INNER Join Deals b ON a.BRA_CODE = b.Bra_Code AND a.CUS_NUM = b.CUS_NUM AND a.CUR_CODE = b.CUR_CODE AND a.LED_CODE = b.LED_CODE AND a.SUB_ACCT_CODE = b.SUB_ACCT_CODE Left OUTER Join LoanPurpose ON a.LED_CODE = LoanPurpose.led_code Left OUTER Join tblLoanInfo c ON a.BRA_CODE = c.BRA_CODE AND a.CUS_NUM = c.CUS_NUM AND a.CUR_CODE = c.CUR_CODE AND a.LED_CODE " & _
+                    "= c.LED_CODE AND a.SUB_ACCT_CODE = c.SUB_ACCT_CODE Left OUTER Join Loan_ins e ON a.BRA_CODE = e.BRA_CODE AND a.CUS_NUM = e.CUS_NUM AND a.CUR_CODE = e.CUR_CODE AND a.LED_CODE = e.LED_CODE AND a.SUB_ACCT_CODE = e.SUB_ACCT_CODE Left OUTER Join LoanClassification ON a.BRA_CODE = LoanClassification.Branch AND a.CUS_NUM = LoanClassification.Cust_Numb1 Left OUTER Join Cus_Pro d ON a.BRA_CODE = d.BRA_CODE AND a.CUS_NUM = d.CUS_NUM WHERE (a.ACCT_NAT <> 1) AND b.type='LOAN_TAB'"
+
+            query = query2 & " UNION SELECT a.BRA_CODE AS branchID, '' AS prevBranchID, CAST(a.BRA_CODE AS nvarchar(4)) + CAST(a.CUS_NUM AS nvarchar(7))+ CAST(a.CUR_CODE AS nvarchar(4)) + CAST(a.LED_CODE AS nvarchar(4)) + CAST(a.SUB_ACCT_CODE AS nvarchar(4)) AS accountNo, " & _
+                    "'' AS prevAccNo, '002' AS [Consent Stat], ' ' AS [Consent Begin Date], ' ' AS [Consent Expiry Date], CASE WHEN A.LED_CODE=1 OR A.LED_CODE=7 OR A.LED_CODE=5 OR A.LED_CODE=2 OR A.LED_CODE=86 OR A.LED_CODE=51 OR A.LED_CODE=59 OR A.LED_CODE=73 AND A.LED_CODE=87 OR A.LED_CODE=74 OR A.LED_CODE=77 OR A.LED_CODE=97 OR A.LED_CODE=52 OR A.LED_CODE=65 OR A.LED_CODE=66 OR A.LED_CODE=68 OR A.LED_CODE=69 OR A.LED_CODE=17 THEN '001' ELSE CONVERT(NVARCHAR(10),A.LED_CODE) END AS typeCode, LoanPurpose.Code AS PurposeOfCF, '001' AS [OwnrshipIndicator/OwnAccount], b.Amount AS [Card Limit], CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END " & _
+                    "AS [approval date], b.CUR_CODE AS currencyCode, a.Fix_flt_flag AS interestRateType, b.Rate AS AnnualInterestRate, CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END AS ActivationDate, CASE WHEN (b.Mat_Date = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Mat_Date, 106), ' ', '-') END AS [maturity date], ISNULL(b.ins_per, 0) " & _
+                    "AS InterestRepayFreqCode, ISNULL(b.ins_per, 0) AS PrincipalRepayFreqCode, b.TotalInstallments AS TotalNoOfInterestInstallments, b.TotalInstallments AS TotalNoOfPrincipalInstallments, '0' AS TotalAmountOfInterestInstallments, b.Amount AS TotalAmountOfPrincipalInstallments, ' ' AS [Highest Credit Used], b.Amount AS [loan amount], " & _
+                    "'0' AS lastInterestPaid, '0' AS LastPrincipalPaid, ' ' AS DatelastPaid, ' ' AS [Date of last payment received (Interest)], b.OverdueDays AS NoofDaysOverdueP, b.OverdueDays AS NoofDaysOverdueI, '0' AS InterestOverdue, '0' " & _
+                    "AS PrincipalOverdue, '0' AS InterestOutstanding, '0' AS PrincipalOutstanding, '0' AS [No of outstanding interest payments], '0' AS [No of outstanding principal payments], b.Classification AS [asset code], CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '1') THEN '001' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '2') THEN '002' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '4') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '8') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '3') " & _
+                    "THEN '004' ELSE '' END) END) END) END) END AS [Account Status], '' AS [CF restructure date], '' AS [amount written off], '' AS [reason for write off], " & _
+                    "CASE WHEN a.STA_CODE = 2 THEN CASE WHEN a.DATE_STA_CHA LIKE '%0001-01-0%' THEN '01-Jan-1933' ELSE REPLACE(CONVERT(VARCHAR(12), cast(a.DATE_STA_CHA AS datetime), 106), ' ', '-') END ELSE NULL END AS [close date], '' AS [reason for close], '002' AS securityCoverageCode, '002' AS GuaranteeCoverage, CASE WHEN d.LEGAL_STA_CODE IS NOT NULL THEN '001' ELSE '002' END AS LegalAction, " & _
+                    "'001' AS [TransTypeCode/DEFAULT], '' AS DisputeID FROM ACCOUNT a INNER Join Deals b ON a.BRA_CODE = b.Bra_Code AND a.CUS_NUM = b.CUS_NUM AND a.CUR_CODE = b.CUR_CODE AND a.LED_CODE = b.LED_CODE AND a.SUB_ACCT_CODE = b.SUB_ACCT_CODE Left OUTER Join LoanPurpose ON a.LED_CODE = LoanPurpose.led_code Left OUTER Join tblLoanInfo c ON a.BRA_CODE = c.BRA_CODE AND a.CUS_NUM = c.CUS_NUM AND a.CUR_CODE = c.CUR_CODE AND a.LED_CODE " & _
+                    "= c.LED_CODE AND a.SUB_ACCT_CODE = c.SUB_ACCT_CODE Left OUTER Join Loan_ins e ON a.BRA_CODE = e.BRA_CODE AND a.CUS_NUM = e.CUS_NUM AND a.CUR_CODE = e.CUR_CODE AND a.LED_CODE = e.LED_CODE AND a.SUB_ACCT_CODE = e.SUB_ACCT_CODE Left OUTER Join LoanClassification ON a.BRA_CODE = LoanClassification.Branch AND a.CUS_NUM = LoanClassification.Cust_Numb1 Left OUTER Join Cus_Pro d ON a.BRA_CODE = d.BRA_CODE AND a.CUS_NUM = d.CUS_NUM WHERE (a.ACCT_NAT <> 1) AND b.type='fac_detl/cust_fac2'"
+
+            Dim objDataAda As New SqlDataAdapter(query, conn)
+            Dim ds As New DataSet
+            objDataAda.Fill(ds)
+
+            If (Not (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files"))) Then
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files")
+            End If
+
+            Dim sro As New StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files\CR Bureau Deals Corporate.txt", False)
+            Dim dr As DataRow
+
+            sb = New System.Text.StringBuilder
+            For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                sb.Append(ds.Tables(0).Columns(ix).ColumnName)
+                If ix < ds.Tables(0).Columns.Count - 1 Then
+                    sb.Append("|")
+                End If
+            Next
+            sro.WriteLine(sb.ToString)
+
+            For Each dr In ds.Tables(0).Rows
+                sb = New System.Text.StringBuilder
+                For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                    sb.Append(dr.Item(ix))
+                    If ix < ds.Tables(0).Columns.Count - 1 Then
+                        sb.Append("|")
+                    End If
+                Next
+                sro.WriteLine(sb.ToString)
+            Next
+            sro.Close()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (GenerateCRBureauDealsCorporate)", "Error")
+        End Try
+    End Sub
+
+    Private Sub GenerateCRBureauDealsConsumer()
+        Try
+            Dim query2 As String = String.Empty
+            Dim sb As New System.Text.StringBuilder
+            query2 = "SELECT a.BRA_CODE AS branchID, '' AS prevBranchID, CAST(a.BRA_CODE AS nvarchar(4)) + CAST(a.CUS_NUM AS nvarchar(7)) + CAST(a.CUR_CODE AS nvarchar(4)) + CAST(a.LED_CODE AS nvarchar(4)) + CAST(a.SUB_ACCT_CODE AS nvarchar(4)) AS accountNo, '' AS prevAccNo, " & _
+                    "'002' AS [Consent Stat], ' ' AS [Consent Begin Date], ' ' AS [Consent Expiry Date], a.LED_CODE AS typeCode, LoanPurpose.Code AS PurposeOfCF, '001' AS [OwnrshipIndicator/OwnAccount], b.Amount AS [Card Limit], CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END " & _
+                    "AS [approval date], b.CUR_CODE AS currencyCode, a.Fix_flt_flag AS interestRateType, b.Rate AS AnnualInterestRate, CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END AS ActivationDate, CASE WHEN (b.Mat_Date = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Mat_Date, 106), ' ', '-') END AS [maturity date], ISNULL(b.ins_per, 0) " & _
+                    "AS InterestRepayFreqCode, ISNULL(b.ins_per, 0) AS PrincipalRepayFreqCode, abs(e.TotInstallment) AS TotalNoOfInterestInstallments, abs(e.TotInstallment) AS TotalNoOfPrincipalInstallments, ISNULL(c.INSTALLMENTI,0) AS TotalAmountOfInterestInstallments, ISNULL(c.INSTALLMENTP,0) AS TotalAmountOfPrincipalInstallments, ' ' AS [Highest Credit Used], b.Amount AS [loan amount], " & _
+                    "ISNULL(c.LAST_PAY_INT,0) AS lastInterestPaid, ISNULL(c.LAST_PAY_PRINCIP,0) AS LastPrincipalPaid, CASE WHEN (c.LAST_PAY_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), c.LAST_PAY_DATE, 106), ' ', '-') END AS DatelastPaid, CASE WHEN (c.LAST_PAY_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), c.LAST_PAY_DATE, 106), ' ', '-') END AS [Date of last payment received (Interest)], ISNULL(b.OverdueDays,0) AS NoofDaysOverdueP, ISNULL(b.OverdueDays,0) AS NoofDaysOverdueI, ISNULL(c.INT_OVD,0) AS InterestOverdue, ISNULL(c.PRINCIP_OVD,0) AS PrincipalOverdue, ISNULL(c.INT_OUT,0) AS InterestOutstanding, " & _
+                    "ISNULL(c.PRINCIP_OUT,0) AS PrincipalOutstanding, ISNULL(c.NoOutstandingI,0) AS [No of outstanding interest payments], ISNULL(c.NoOutstandingP,0) AS [No of outstanding principal payments], b.Classification AS [asset code], CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '1') THEN '001' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '2') THEN '002' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '4') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '8') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '3') " & _
+                    "THEN '004' ELSE '' END) END) END) END) END AS [Account Status], '' AS [CF restructure date], '' AS [amount written off], '' AS [reason for write off], CASE WHEN a.STA_CODE = 2 THEN CASE WHEN a.DATE_STA_CHA LIKE '%0001-01-0%' THEN '01-Jan-1933' ELSE REPLACE(CONVERT(VARCHAR(12), cast(a.DATE_STA_CHA AS datetime), " & _
+                    "106), ' ', '-') END ELSE NULL END AS [close date], '' AS [reason for close], '002' AS securityCoverageCode, '' AS [card number], '002' AS GuaranteeCoverage, CASE WHEN d.LEGAL_STA_CODE IS NOT NULL THEN '001' ELSE '002' END AS LegalAction, '001' AS [TransTypeCode/DEFAULT], '' AS DisputeID FROM ACCOUNT a INNER Join Deals b ON a.BRA_CODE = b.Bra_Code AND a.CUS_NUM = b.CUS_NUM AND a.CUR_CODE = b.CUR_CODE AND a.LED_CODE = b.LED_CODE AND a.SUB_ACCT_CODE = b.SUB_ACCT_CODE " & _
+                    "INNER Join LoanPurpose ON a.LED_CODE = LoanPurpose.led_code Left OUTER Join tblLoanInfo c ON a.BRA_CODE = c.BRA_CODE AND a.CUS_NUM = c.CUS_NUM AND a.CUR_CODE = c.CUR_CODE AND a.LED_CODE = c.LED_CODE AND a.SUB_ACCT_CODE = c.SUB_ACCT_CODE Left OUTER Join Loan_ins e ON a.BRA_CODE = e.BRA_CODE AND a.CUS_NUM = e.CUS_NUM AND a.CUR_CODE = e.CUR_CODE AND a.LED_CODE = e.LED_CODE AND a.SUB_ACCT_CODE = e.SUB_ACCT_CODE Left OUTER Join LoanClassification ON a.BRA_CODE = LoanClassification.Branch AND a.CUS_NUM = LoanClassification.Cust_Numb1 Left OUTER Join Cus_Pro d ON a.BRA_CODE = d.BRA_CODE AND a.CUS_NUM = d.CUS_NUM WHERE (a.ACCT_NAT = 1) AND b.type='LOAN_TAB'"
+
+            query = query2 & " UNION SELECT a.BRA_CODE AS branchID, '' AS prevBranchID, CAST(a.BRA_CODE AS nvarchar(4)) + CAST(a.CUS_NUM AS nvarchar(7)) + CAST(a.CUR_CODE AS nvarchar(4)) + CAST(a.LED_CODE AS nvarchar(4)) + CAST(a.SUB_ACCT_CODE AS nvarchar(4)) AS accountNo, '' AS prevAccNo, " & _
+                    "'002' AS [Consent Stat], ' ' AS [Consent Begin Date], ' ' AS [Consent Expiry Date], CASE WHEN A.LED_CODE=1 OR A.LED_CODE=7 OR A.LED_CODE=5 OR A.LED_CODE=2 OR A.LED_CODE=86 OR A.LED_CODE=51 OR A.LED_CODE=59 OR A.LED_CODE=73 AND A.LED_CODE=87 OR A.LED_CODE=74 OR A.LED_CODE=77 OR A.LED_CODE=97 OR A.LED_CODE=52 OR A.LED_CODE=65 OR A.LED_CODE=66 OR A.LED_CODE=68 OR A.LED_CODE=69 OR A.LED_CODE=17 THEN '017' ELSE CONVERT(NVARCHAR(10),A.LED_CODE) END AS typeCode, LoanPurpose.Code AS PurposeOfCF, '001' AS [OwnrshipIndicator/OwnAccount], b.Amount AS [Card Limit], CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END " & _
+                    "AS [approval date], b.CUR_CODE AS currencyCode, a.Fix_flt_flag AS interestRateType, b.Rate AS AnnualInterestRate, CASE WHEN (b.Eff_DATE = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Eff_DATE, 106), ' ', '-') END AS ActivationDate, CASE WHEN (b.Mat_Date = '1900-01-01') THEN '' ELSE REPLACE(CONVERT(VARCHAR(12), b.Mat_Date, 106), ' ', '-') END AS [maturity date], ISNULL(b.ins_per, 0) " & _
+                    "AS InterestRepayFreqCode, ISNULL(b.ins_per, 0) AS PrincipalRepayFreqCode, b.TotalInstallments AS TotalNoOfInterestInstallments, b.TotalInstallments AS TotalNoOfPrincipalInstallments, '0' AS TotalAmountOfInterestInstallments, b.Amount AS TotalAmountOfPrincipalInstallments, ' ' AS [Highest Credit Used], b.Amount AS [loan amount], " & _
+                    "'0' AS lastInterestPaid, '0' AS LastPrincipalPaid, ' ' AS DatelastPaid, ' ' AS [Date of last payment received (Interest)], b.OverdueDays AS NoofDaysOverdueP, b.OverdueDays AS NoofDaysOverdueI, '0' AS InterestOverdue, '0' AS PrincipalOverdue, '0' AS InterestOutstanding, " & _
+                    "'0' AS PrincipalOutstanding, '0' AS [No of outstanding interest payments], '0' AS [No of outstanding principal payments], b.Classification AS [asset code], CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '1') THEN '001' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '2') THEN '002' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '4') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '8') THEN '003' ELSE (CASE WHEN (CAST(a.STA_CODE AS nvarchar(10)) = '3') " & _
+                    "THEN '004' ELSE '' END) END) END) END) END AS [Account Status], '' AS [CF restructure date], '' AS [amount written off], '' AS [reason for write off], CASE WHEN a.STA_CODE = 2 THEN CASE WHEN a.DATE_STA_CHA LIKE '%0001-01-0%' THEN '01-Jan-1933' ELSE REPLACE(CONVERT(VARCHAR(12), cast(a.DATE_STA_CHA AS datetime), " & _
+                    "106), ' ', '-') END ELSE NULL END AS [close date], '' AS [reason for close], '002' AS securityCoverageCode, '' AS [card number], '002' AS GuaranteeCoverage, CASE WHEN d.LEGAL_STA_CODE IS NOT NULL THEN '001' ELSE '002' END AS LegalAction, '001' AS [TransTypeCode/DEFAULT], '' AS DisputeID FROM ACCOUNT a INNER Join Deals b ON a.BRA_CODE = b.Bra_Code AND a.CUS_NUM = b.CUS_NUM AND a.CUR_CODE = b.CUR_CODE AND a.LED_CODE = b.LED_CODE AND a.SUB_ACCT_CODE = b.SUB_ACCT_CODE " & _
+                    "INNER Join LoanPurpose ON a.LED_CODE = LoanPurpose.led_code Left OUTER Join tblLoanInfo c ON a.BRA_CODE = c.BRA_CODE AND a.CUS_NUM = c.CUS_NUM AND a.CUR_CODE = c.CUR_CODE AND a.LED_CODE = c.LED_CODE AND a.SUB_ACCT_CODE = c.SUB_ACCT_CODE Left OUTER Join Loan_ins e ON a.BRA_CODE = e.BRA_CODE AND a.CUS_NUM = e.CUS_NUM AND a.CUR_CODE = e.CUR_CODE AND a.LED_CODE = e.LED_CODE AND a.SUB_ACCT_CODE = e.SUB_ACCT_CODE Left OUTER Join LoanClassification ON a.BRA_CODE = LoanClassification.Branch AND a.CUS_NUM = LoanClassification.Cust_Numb1 Left OUTER Join Cus_Pro d ON a.BRA_CODE = d.BRA_CODE AND a.CUS_NUM = d.CUS_NUM WHERE (a.ACCT_NAT = 1) AND b.type='fac_detl/cust_fac2'"
+
+            Dim objDataAda As New SqlDataAdapter(query, conn)
+            Dim ds As New DataSet
+            objDataAda.Fill(ds)
+
+            If (Not (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files"))) Then
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files")
+            End If
+
+            Dim sro As New StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) & "\CRC Files\CR Bureau Deals Consumer.txt", False)
+            Dim dr As DataRow
+
+            sb = New System.Text.StringBuilder
+            For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                sb.Append(ds.Tables(0).Columns(ix).ColumnName)
+                If ix < ds.Tables(0).Columns.Count - 1 Then
+                    sb.Append("|")
+                End If
+            Next
+            sro.WriteLine(sb.ToString)
+
+            For Each dr In ds.Tables(0).Rows
+                sb = New System.Text.StringBuilder
+                For ix As Integer = 0 To ds.Tables(0).Columns.Count - 1
+                    sb.Append(dr.Item(ix))
+                    If ix < ds.Tables(0).Columns.Count - 1 Then
+                        sb.Append("|")
+                    End If
+                Next
+                sro.WriteLine(sb.ToString)
+            Next
+            sro.Close()
+            conn.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & " (GenerateCRBureauDealsConsumer)", "Error")
+        End Try
+    End Sub
+
+    Private Sub frmCRCMainPackage_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            DateTimePicker1.Value = DateTime.Now.Date.AddDays(-1)
+            ExecuteSpAccount()
+            ExecuteSpAccount2()
+            ExecuteSpDealsLoan()
+            ExecuteSpDealsLoan2()
+            ExecuteDealsFacility()
+            ConvertAcct()
+            ExecuteUsp_PopulateDealsTable()
+            ExecuteSpCRBureauLoanIns()
+            ExecuteSpLoanIns()
+            ExecuteSpLoan_Ins_Del()
+            ExecuteSpLoan_Ins()
+            ExecuteSpLoan_Ins2()
+            ExecuteLoan()
+            ExecuteSPCRCCRDATE_1()
+            ExecuteSPCRCCRDATE_2()
+            ExecuteSPCRCDRDATE()
+            ExecuteSpCRCDateDueFromBanks()
+            ExecuteSpCRCDateDueFromBanks2()
+            ExecuteCreditBurClassifi()
+            GenerateCRBureauSubjCorporate()
+            GenerateCRBureauDealsCorporate()
+            GenerateCRBureauDealsConsumer()
+            GenerateCRBureauSubjConsumer()
+            Me.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
+        End Try
+    End Sub
+End Class
